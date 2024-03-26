@@ -4,24 +4,7 @@ import styled from "styled-components";
 
 function App() {
   const [light, setLight] = useState(false);
-  const [edit, setEdit] = useState(false);
-  const [posts, setPosts] = useState([
-    {
-      id: "1",
-      title: "Jog around the park 3x",
-      isDone: true,
-    },
-    {
-      id: "2",
-      title: "10 minutes medition",
-      isDone: false,
-    },
-    {
-      id: "3",
-      title: "Read for 1 hour",
-      isDone: false,
-    },
-  ]);
+  const [posts, setPosts] = useState([]);
   const titles = ["All", "Active", "Completed"];
   const handleClick = () => {
     setLight(!light);
@@ -32,8 +15,10 @@ function App() {
     posts.splice(deleteIndex, 1);
     setPosts([...posts]);
   };
-  const changeBackground = () => {
-    setEdit(!edit);
+  const changeBackground = (postId) => {
+    const markIndex = posts.findIndex((item) => item.id == postId);
+    posts[markIndex].isDone = !posts[markIndex].isDone;
+    setPosts([...posts]);
   };
 
   return (
@@ -53,11 +38,12 @@ function App() {
               placeholder="Create a new todo…"
               light={light}
               onKeyDown={(e) => {
-                if (e.key == "Enter") {
+                if (e.key == "Enter" && e.target.value.trim() !== "") {
                   setPosts([
                     ...posts,
-                    { title: e.target.value, isDone: false, id: Math.random() },
+                    { id: Math.random(), title: e.target.value, isDone: false },
                   ]);
+                  e.target.value = "";
                 }
               }}
             ></Input>
@@ -68,12 +54,11 @@ function App() {
           {posts.map((element, index) => {
             return (
               <WrapperTodo light={light} key={index}>
-                <H4
-                  edit={edit}
-                  onClick={() => changeBackground(element.id)}
-                ></H4>
-
-                <H6 edit={edit}>{element.title}</H6>
+                <input
+                  type="checkbox"
+                  onChange={() => changeBackground(element.id)}
+                />
+                <H6 isDone={element.isDone}>{element.title}</H6>
                 <H5 light={light} onClick={handleDelete}>
                   x
                 </H5>
@@ -96,7 +81,7 @@ function App() {
 export default App;
 
 const Container = styled.div`
-  max-width: 375px;
+  width: 100%;
 
   @media (min-width: 768px) {
     max-width: 768px;
@@ -107,7 +92,7 @@ const Headerimage = styled.div`
     props.light
       ? `url("/images/header-image.png")`
       : `url("/images/header-image-light.png")`};
-  width: 375px;
+  width: 100%;
   height: 200px;
   background-position: center;
   background-size: cover;
@@ -229,17 +214,6 @@ const H3 = styled.h3`
     font-size: 20px;
   }
 `;
-const H4 = styled.h4`
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  border: ${(props) => (props.edit ? "1px solid white" : "1px solid black")};
-  background-color: ${(props) => (props.edit ? "green" : "white")};
-  cursor: pointer;
-  &&:hover {
-    background-color: green;
-  }
-`;
 const H5 = styled.h5`
   font-size: 20px;
   font-weight: normal;
@@ -250,5 +224,6 @@ const H5 = styled.h5`
   }
 `;
 const H6 = styled.h6`
-  text-decoration: ${(props) => (props.edit ? "line-through" : "")};
+  text-decoration: ${(props) => (props.isDone ? "line-through" : "none")};
+  cursor: pointer;
 `;
